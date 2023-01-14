@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int             @id @default(autoincrement())
+  email             String          @unique
+  name              String?
+  fid               String          @unique
+  Transaction       Transaction[]
+  level             MembershipLevel @relation(fields: [membershipLevelId], references: [id])
+  membershipLevelId Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model MembershipLevel {
+  id         Int       @id @default(autoincrement())
+  name       String
+  multiplier Float     @default(1) // 1 = 1 point per dollar (business logic)
+  priority   Int       @default(0) // lowest becomes default
+  User       User[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  amount    Int
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  remark    String   @default("")
+  timestamp DateTime @default(now())
+}
+
+model Reward {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  cost        Int
+  image       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}

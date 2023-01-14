@@ -1,21 +1,4 @@
-import dotenv from 'dotenv';
-import env from 'env-var';
-
-import { credential } from 'firebase-admin';
-import { initializeApp } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-
-dotenv.config();
-
-export const firebase = initializeApp({
-  credential: credential.cert({
-    clientEmail: env.get('FIREBASE_CLIENT_EMAIL').required().asString(),
-    privateKey: env.get('FIREBASE_PRIVATE_KEY').required().asString(),
-    projectId: env.get('FIREBASE_PROJECT_ID').required().asString(),
-  }),
-});
-
-import { initTRPC, TRPCError } from '@trpc/server';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import cors from '@fastify/cors';
@@ -24,13 +7,10 @@ import {
   fastifyTRPCPlugin,
 } from '@trpc/server/adapters/fastify';
 import fastify from 'fastify';
+import { mergeRouters, middleware, publicProcedure, router } from './lib/trpc';
 import { assoc } from 'ramda';
-
-type ContextReturn = {
-  user: string | null;
-};
-
-const auth = getAuth(firebase);
+import { firebaseAuth } from './lib/firebase';
+import routers from './routers';
 
 const createContext = async ({ req, res }: CreateFastifyContextOptions) => {
   const base = {
@@ -47,7 +27,7 @@ const createContext = async ({ req, res }: CreateFastifyContextOptions) => {
   }
 
   try {
-    const decoded = await auth.verifyIdToken(token);
+    const decoded = await firebaseAuth.verifyIdToken(token);
     return assoc('user', decoded.sub, base);
   } catch (error) {
     console.error(error);
@@ -55,14 +35,7 @@ const createContext = async ({ req, res }: CreateFastifyContextOptions) => {
   }
 };
 
-const t = initTRPC
-  .context<CreateFastifyContextOptions & ContextReturn>()
-  .create();
-
-const router = t.router;
-export const publicProcedure = t.procedure;
-
-const isAuthenticated = t.middleware(({ ctx, next }) => {
+const isAuthenticated = middleware(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
@@ -73,14 +46,14 @@ const isAuthenticated = t.middleware(({ ctx, next }) => {
   });
 });
 
-const isAdmin = t.middleware(async ({ ctx, next }) => {
+const isAdmin = middleware(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
     });
   }
   try {
-    const user = await auth.getUser(ctx.user);
+    const user = await firebaseAuth.getUser(ctx.user);
     if (!user.customClaims || user.customClaims.role !== 'admin') {
       throw new TRPCError({
         code: 'UNAUTHORIZED',
@@ -96,8 +69,8 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
   }
 });
 
-export const privateProcedure = t.procedure.use(isAuthenticated);
-export const adminProcedure = t.procedure.use(isAdmin);
+export const privateProcedure = publicProcedure.use(isAuthenticated);
+export const adminProcedure = publicProcedure.use(isAdmin);
 
 const appRouter = router({
   greet: publicProcedure.input(z.string()).query((req) => {
@@ -125,14 +98,15 @@ const server = fastify({
 server.register(cors);
 server.register(fastifyTRPCPlugin, {
   prefix: '/trpc',
-  trpcOptions: { router: appRouter, createContext },
+  trpcOptions: { router: mergeRouters(appRouter, routers), createContext },
 });
 
 (async () => {
   try {
-    await server.listen({
+    const address = await server.listen({
       port: 5000,
     });
+    console.log(`Server listening at ${address}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
