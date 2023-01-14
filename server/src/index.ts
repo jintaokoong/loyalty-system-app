@@ -24,6 +24,7 @@ import {
   fastifyTRPCPlugin,
 } from '@trpc/server/adapters/fastify';
 import fastify from 'fastify';
+import { assoc } from 'ramda';
 
 type ContextReturn = {
   user: string | null;
@@ -32,30 +33,25 @@ type ContextReturn = {
 const auth = getAuth(firebase);
 
 const createContext = async ({ req, res }: CreateFastifyContextOptions) => {
-  console.log('invoked createContext');
+  const base = {
+    req,
+    res,
+  };
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return { req, res, user: null };
+    return assoc('user', null, base);
   }
   const token = authHeader.split(' ')[1];
   if (!token) {
-    return { req, res, user: null };
+    return assoc('user', null, base);
   }
 
   try {
     const decoded = await auth.verifyIdToken(token);
-    return {
-      req,
-      res,
-      user: decoded.sub,
-    };
+    return assoc('user', decoded.sub, base);
   } catch (error) {
     console.error(error);
-    return {
-      req,
-      res,
-      user: null,
-    };
+    return assoc('user', null, base);
   }
 };
 
@@ -64,7 +60,7 @@ const t = initTRPC
   .create();
 
 const router = t.router;
-const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure;
 
 const isAuthenticated = t.middleware(({ ctx, next }) => {
   if (!ctx.user) {
@@ -77,7 +73,31 @@ const isAuthenticated = t.middleware(({ ctx, next }) => {
   });
 });
 
-const privateProcedure = t.procedure.use(isAuthenticated);
+const isAdmin = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+    });
+  }
+  try {
+    const user = await auth.getUser(ctx.user);
+    if (!user.customClaims || user.customClaims.role !== 'admin') {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+      });
+    }
+    return next({
+      ctx: ctx,
+    });
+  } catch (error) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+    });
+  }
+});
+
+export const privateProcedure = t.procedure.use(isAuthenticated);
+export const adminProcedure = t.procedure.use(isAdmin);
 
 const appRouter = router({
   greet: publicProcedure.input(z.string()).query((req) => {
@@ -89,6 +109,11 @@ const appRouter = router({
   guarded: privateProcedure.query(() => {
     return {
       message: 'You are authenticated',
+    };
+  }),
+  admin: adminProcedure.query(() => {
+    return {
+      message: 'You are an admin',
     };
   }),
 });

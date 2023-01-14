@@ -76,6 +76,7 @@ importers:
       '@trpc/client': ^10.9.0
       '@trpc/server': ^10.9.0
       '@types/jest': ^29.2.5
+      '@types/ramda': ^0.28.20
       '@typescript-eslint/eslint-plugin': ^5.46.1
       '@typescript-eslint/parser': ^5.46.1
       dotenv: ^16.0.3
@@ -87,6 +88,7 @@ importers:
       jest: ^29.3.1
       nodemon: ^2.0.20
       prettier: ^2.8.1
+      ramda: ^0.28.0
       ts-jest: ^29.0.3
       typescript: ^4.9.4
       zod: ^3.20.2
@@ -99,12 +101,14 @@ importers:
       env-var: 7.3.0
       fastify: 4.11.0
       firebase-admin: 11.4.1_@firebase+app-types@0.9.0
+      ramda: 0.28.0
       zod: 3.20.2
     devDependencies:
       '@swc-node/register': 1.5.5_rmzwhy4t3g2w4jfehjrsbeodby
       '@swc/cli': 0.1.59_@swc+core@1.3.26
       '@swc/core': 1.3.26
       '@types/jest': 29.2.5
+      '@types/ramda': 0.28.20
       '@typescript-eslint/eslint-plugin': 5.48.1_3jon24igvnqaqexgwtxk6nkpse
       '@typescript-eslint/parser': 5.48.1_iukboom6ndih5an6iafl45j2fe
       eslint: 8.31.0
@@ -2405,6 +2409,12 @@ packages:
   /@types/qs/6.9.7:
     resolution: {integrity: sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==}
     dev: false
+
+  /@types/ramda/0.28.20:
+    resolution: {integrity: sha512-MeUhzGSXQTRsY19JGn5LIBTLxVEnyF6HDNr08KSJqybsm4DlfLIgK1jBHjhpiSyk252tXYmp+UOe0UFg0UiFsA==}
+    dependencies:
+      ts-toolbelt: 6.15.5
+    dev: true
 
   /@types/range-parser/1.2.4:
     resolution: {integrity: sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==}
@@ -6262,6 +6272,10 @@ packages:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
     dev: false
 
+  /ramda/0.28.0:
+    resolution: {integrity: sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==}
+    dev: false
+
   /rc-basic/1.1.0_ie75ejlwqy5zh3tldgt7pftwcu:
     resolution: {integrity: sha512-yfbq/n9C4tIVaSoVKyjnfYIwI0DvmiV8IyIxNsVZ2/6p1nzNt/Q0zHG3MwS3PxpXfrywRV+vJtBpP8NZ/eaAlQ==}
     engines: {node: '>=14.18.0', pnpm: '>=7.0.0'}
@@ -7062,6 +7076,10 @@ packages:
       semver: 7.3.8
       typescript: 4.9.4
       yargs-parser: 21.1.1
+    dev: true
+
+  /ts-toolbelt/6.15.5:
+    resolution: {integrity: sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==}
     dev: true
 
   /tslib/1.14.1:

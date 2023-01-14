@@ -5,9 +5,20 @@ import { Button, Text } from '@mantine/core';
 import { getAuth } from 'firebase/auth';
 import { useContext } from 'react';
 
+const AdminComponent = () => {
+  const { data, isLoading, error } = trpc.admin.useQuery();
+  return (
+    <>
+      {isLoading && <Text>Loading...</Text>}
+      {data && <Text>{data.message}</Text>}
+      {error && <Text color={'red'}>{error.message}</Text>}
+    </>
+  );
+};
+
 export default function () {
   const UseAuthReturn = useContext(AuthenticationContext);
-  const { data, isLoading } = trpc.guarded.useQuery();
+  const { data, isLoading } = trpc.guarded.useQuery(undefined);
   if (!UseAuthReturn) {
     throw new Error('no context');
   }
@@ -30,6 +41,7 @@ export default function () {
       <Text>Dashboard</Text>
       {isLoading && <Text>Loading...</Text>}
       {data && <Text>{data.message}</Text>}
+      <AdminComponent />
       <Button color={'red'} onClick={onLogout}>
         Logout
       </Button>
