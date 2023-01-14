@@ -1,0 +1,13 @@
+{
+  "name": "points-system-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "ds": "pnpm --filter server dev",
+    "dc": "pnpm --filter client dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
