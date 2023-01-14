@@ -6,6 +6,7 @@ import {
   CreateFastifyContextOptions,
   fastifyTRPCPlugin,
 } from '@trpc/server/adapters/fastify';
+import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
 import fastify from 'fastify';
 import { mergeRouters, middleware, publicProcedure, router } from './lib/trpc';
 import { assoc } from 'ramda';
@@ -91,17 +92,29 @@ const appRouter = router({
   }),
 });
 
-const server = fastify({
-  maxParamLength: 5000,
-});
+const mergedRouter = mergeRouters(appRouter, routers);
 
-server.register(cors);
-server.register(fastifyTRPCPlugin, {
-  prefix: '/trpc',
-  trpcOptions: { router: mergeRouters(appRouter, routers), createContext },
-});
+const API_ENDPOINT = '/trpc';
+const PLAYGROUND_ENDPOINT = '/playground';
 
 (async () => {
+  const server = fastify({
+    maxParamLength: 5000,
+  });
+
+  server.register(cors);
+  server.register(fastifyTRPCPlugin, {
+    prefix: API_ENDPOINT,
+    trpcOptions: { router: mergedRouter, createContext },
+  });
+  const plugin = await getFastifyPlugin({
+    playgroundEndpoint: PLAYGROUND_ENDPOINT,
+    router: mergedRouter,
+    trpcApiEndpoint: API_ENDPOINT,
+  });
+  server.register(plugin, {
+    prefix: PLAYGROUND_ENDPOINT,
+  });
   try {
     const address = await server.listen({
       port: 5000,
