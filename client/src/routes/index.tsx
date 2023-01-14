@@ -1,3 +1,6 @@
+import trpc from "@/libs/trpc";
+
 export default function Index() {
-  return <div>Hello World</div>;
+  const { data, isLoading } = trpc.greet.useQuery("world");
+  return <div>{isLoading ? "..." : data?.message}</div>;
 }

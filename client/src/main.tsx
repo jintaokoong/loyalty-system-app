@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import routes from "@/routes";
 import App from "@/App";
 import "@/global";
+import Providers from "./providers";
 
 const container = document.getElementById("root") as HTMLElement;
 
@@ -24,6 +25,8 @@ if (import.meta.hot) {
 
 root.render(
   <StrictMode>
-    <RouterProvider router={router} fallbackElement={<div>loading...</div>} />
+    <Providers>
+      <RouterProvider router={router} fallbackElement={<div>loading...</div>} />
+    </Providers>
   </StrictMode>
 );

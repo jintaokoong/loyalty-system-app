@@ -19,6 +19,10 @@
     "package.json": "pnpm sort-package-json"
   },
   "dependencies": {
+    "@tanstack/react-query": "^4.22.0",
+    "@trpc/client": "^10.9.0",
+    "@trpc/react-query": "^10.9.0",
+    "@trpc/server": "^10.9.0",
     "rc-basic": "1.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
