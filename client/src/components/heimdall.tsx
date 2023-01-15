@@ -14,6 +14,12 @@ export const AuthenticationContext = createContext<
   | null
 >(null);
 
+/**
+ * Heimdall is the gatekeeper of the application, it will check if the user is authenticated or not
+ * and redirect the user to the appropriate page.
+ * @param p Props to pass the children
+ * @returns Wrapped children
+ */
 const AuthenticationProvider = (p: PropsWithChildren) => {
   const [state, send, intepret] = useMachine(authenticationMachine);
   const navigate = useNavigate();
